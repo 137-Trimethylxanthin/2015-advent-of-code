@@ -13,7 +13,7 @@ SRC = $(wildcard src/*.c)
 OBJ = $(SRC:src/%.c=src/%.o)
 
 # Executable name
-EXEC = day1
+EXEC = day4
 
 # Default target
 all: $(EXEC)

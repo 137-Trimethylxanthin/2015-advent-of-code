@@ -1,79 +1,50 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-static void read_content(const char *filename, char **content)
-{
-    FILE *file = fopen(filename, "r");
-    if (file == NULL)
-    {
-        printf("File not found\n");
-        *content = NULL;
-        return;
-    }
-    fseek(file, 0, SEEK_END);
-    long length = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    printf("Length: %ld\n", length);
-    *content = (char *)malloc((length + 1) * sizeof(char));
-    fread(*content, 1, length, file);
-    (*content)[length] = '\0'; // Add null terminator
-    fclose(file);
+int min_of_three(int a, int b, int c) {
+    int min = a;
+    if (b < min) min = b;
+    if (c < min) min = c;
+    return min;
 }
 
-static int min(int a, int b)
-{
-    return a < b ? a : b;
+
+int calculate_paper(int l, int w, int h) {
+    int side1 = l * w;
+    int side2 = w * h;
+    int side3 = h * l;
+    int smallest_side = min_of_three(side1, side2, side3);
+    
+    return 2 * (side1 + side2 + side3) + smallest_side;
 }
 
-static void parse_into_arr(const char *content, int **arr)
-{
-    int count = 0;
-    for (int i = 0; i < strlen(content); i++)
-    {
-        if (content[i] == '\n')
-        {
-            count++;
-        }
-    }
-    *arr = (int *)malloc(count * sizeof(int));
-    int index = 0;
-    char *token = strtok(content, "\n");
-    while (token != NULL)
-    {
-        // 12x34x45\n
-        int l, w, h;
-        sscanf(token, "%dx%dx%d", &l, &w, &h);
-        l = l * w;
-        w = w * h;
-        h = h * l;
+int calculate_ribbon(int l, int w, int h) {
+    int smallest_perimeter = min_of_three(2 * (l + w), 2 * (w + h), 2 * (h + l));
+    int volume = l * w * h;
 
-        int minimum = min(min(l, w), h);
-        (*arr)[index] = ((2 * l) + (2 * w) + (2 * h)) + minimum;
-        index++;
-        token = strtok(NULL, "\n");
-        }
-    int total = 0;
-    for (int i = 0; i < count; i++)
-    {
-        total += (*arr)[i];
-    }
-    printf("Total: %d\n", total);
-
+    return smallest_perimeter + volume;
 }
 
-int main(int argc, char const *argv[])
-{
-    char *content = NULL;
-    read_content("input.txt", &content);
-    if (content == NULL)
-    {
+int main() {
+    FILE *file = fopen("input.txt", "r");
+    if (file == NULL) {
+        printf("Error opening file\n");
         return 1;
     }
 
-    int *arr = NULL;
-    parse_into_arr(content, &arr);
+    int l, w, h;
+    int total_paper = 0;
+    int total_ribbon = 0;
 
+    while (fscanf(file, "%dx%dx%d", &l, &w, &h) == 3) {
+        total_paper += calculate_paper(l, w, h);
+        total_ribbon += calculate_ribbon(l, w, h);
+    }
+
+    fclose(file);
+
+    printf("Total square feet of wrapping paper needed: %d\n", total_paper);
+    printf("Total feet of ribbon needed: %d\n", total_ribbon);
 
     return 0;
 }
